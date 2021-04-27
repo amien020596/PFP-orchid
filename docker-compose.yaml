@@ -1,0 +1,63 @@
+version: '3.7'
+services: 
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      DB_HOST: database
+      DB_DATABASE: orchid
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - 8012:8000
+    volumes: 
+      - .:/app
+    depends_on: 
+      - database
+    networks: 
+      - app-orchid
+      
+  database:
+    image: mysql:5.7.22
+    environment: 
+      MYSQL_DATABASE: orchid
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    volumes: 
+      - .dbdata:/var/lib/mysql
+    ports:
+      - 3013:3306
+    networks: 
+      - app-orchid
+
+  composer:
+    build:
+      context: .
+      dockerfile: composer.Dockerfile
+    volumes:
+      - .:/app
+    networks: 
+      - app-orchid
+
+  
+  artisan:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    entrypoint: ["php","/app/artisan"]
+    networks: 
+      - app-orchid
+
+  npm:
+    image: "node:14"
+    working_dir: /app
+    entrypoint: ["npm"]
+    volumes:
+      - .:/app
+      
+networks: 
+  app-orchid:
